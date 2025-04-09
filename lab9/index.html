@@ -1,0 +1,61 @@
+<html>
+<head>
+    <title>景點觀光展覽資訊</title>
+    <style>
+        /* 簡單的 CSS 樣式，讓表格看起來更像圖片中的樣式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #04AA6D;
+        }
+        .table-striped tbody tr:nth-child(odd) {
+            background-color: #f9f9f9;
+        }
+        .table-hover tbody tr:hover {
+            background-color: #ddd;
+        }
+    </style>
+</head>
+<body>
+    <h1>景點觀光展覽資訊</h1>
+    <table id="csie" class="table table-striped table-hover">
+        <tr>
+            <th>名稱</th>
+            <th>地點</th>
+            <th>票價</th>
+        </tr>
+    </table>
+
+    <script>
+        var openUrl =
+          "https://cloud.culture.tw/frontsite/trans/SearchShowAction.do?method=doFindTypeJ&category=6";
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', openUrl, true);
+        xhr.send();
+
+        xhr.onreadystatechange = function() {
+          if (this.readyState == 4 && this.status == 200) {
+            var dataset = JSON.parse(this.responseText);
+            addNewData(dataset);
+          }
+        };
+
+        function addNewData(dataset) {
+          var myTable = document.getElementById("csie");
+          dataset.forEach(function(data, index) {
+            var row = myTable.insertRow(-1);
+            row.insertCell(0).innerHTML = data['title'];
+            row.insertCell(1).innerHTML = data['showInfo'][0]['location'];
+            row.insertCell(2).innerHTML = data['showInfo'][0]['price'];
+          });
+        }
+    </script>
+</body>
+</html>
