@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>HW3</title>
+  
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>景點觀光展覽資訊</title>
+    <style>
+        body {
+            font-family: sans-serif;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #04AA6D;
+            color: white;
+        }
+        .pagination {
+            margin-top: 10px;
+        }
+        .pagination button {
+            padding: 5px 10px;
+            margin: 0 5px;
+            cursor: pointer;
+        }
+        #search-container {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>景點觀光展覽資訊</h1>
+
+    <div id="search-container">
+        <label for="search-input"></label>
+        <input type="text" id="search-input" onkeyup="searchData()">
+    </div>
+
+    <table id="csie">
+        <thead>
+            <tr>
+                <th>名稱</th>
+                <th>地點</th>
+                <th>票價</th>
+            </tr>
+        </thead>
+        <tbody>
+            </tbody>
+    </table>
+
+    <div class="pagination">
+        <button id="prev-page" disabled>上一頁</button>
+        <span id="page-info">第 1 頁，共 0 頁</span>
+        <button id="next-page" disabled>下一頁</button>
+    </div>
+
+    <script>
+        var openUrl =
+            "https://cloud.culture.tw/frontsite/trans/SearchShowAction.do?method=doFindTypeJ&category=6";
+        var allData = []; // 儲存所有原始資料
+        var filteredData = []; // 儲存搜尋後的資料
+        var currentPage = 1;
+        var itemsPerPage = 10;
+
+        // 取得表格 body 元素
+        var tableBody = document.querySelector("#csie tbody");
+        var pageInfoSpan = document.getElementById("page-info");
+        var prevPageButton = document.getElementById("prev-page");
+        var nextPageButton = document.getElementById("next-page");
+        var searchInput = document.getElementById("search-input");
+
+        // 事件監聽器
+        prevPageButton.addEventListener('click', goToPrevPage);
+        nextPageButton.addEventListener('click', goToNextPage);
+
+        // 發送 HTTP 請求獲取資料
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', openUrl, true);
+        xhr.send();
+
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                allData = JSON.parse(this.responseText);
+                filteredData = [...allData]; // 初始時，過濾後的資料等於所有資料
+                updatePagination();
+                renderTable();
+            }
+        };
+
+        function renderTable() {
+            tableBody.innerHTML = ''; // 清空表格
+
+            var startIndex = (currentPage - 1) * itemsPerPage;
+            var endIndex = startIndex + itemsPerPage;
+            var currentPageData = filteredData.slice(startIndex, endIndex);
+
+            currentPageData.forEach(function(data) {
+                var row = tableBody.insertRow();
+                row.insertCell().textContent = data['title'];
+                row.insertCell().textContent = data['showInfo'][0]['location'] || '無資料';
+                row.insertCell().textContent = data['showInfo'][0]['price'] || '免費/洽詢';
+            });
+        }
+
+        function updatePagination() {
+            var totalPages = Math.ceil(filteredData.length / itemsPerPage) || 1;
+            pageInfoSpan.textContent = `第 ${currentPage} 頁，共 ${totalPages} 頁`;
+            prevPageButton.disabled = currentPage === 1;
+            nextPageButton.disabled = currentPage === totalPages;
+        }
+
+        function goToPrevPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                renderTable();
+                updatePagination();
+            }
+        }
+
+        function goToNextPage() {
+            var totalPages = Math.ceil(filteredData.length / itemsPerPage) || 1;
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderTable();
+                updatePagination();
+            }
+        }
+
+        function searchData() {
+            var keyword = searchInput.value.toLowerCase();
+            filteredData = allData.filter(function(data) {
+                return data['title'].toLowerCase().includes(keyword);
+            });
+            currentPage = 1; // 搜尋後回到第一頁
+            updatePagination();
+            renderTable();
+        }
+    </script>
+</body>
+</html>
+<!-- partial -->
+  <script  src="./script.js"></script>
+
+</body>
+</html>
